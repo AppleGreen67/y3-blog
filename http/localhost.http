@@ -1,0 +1,24 @@
+###
+curl http://localhost:8080/api/posts?search=Lalala&pageNumber=1&pageSize=5
+
+###
+curl http://localhost:8080/api/posts/1
+
+###
+curl -X POST http://localhost:8080/api/posts \
+    -H "Content-Type: application/json;charset=UTF-8" \
+    -d '{"title":"post title","text":"post text","tags":["tag_1"]}'
+
+###
+curl -X PUT http://localhost:8080/api/posts/3 \
+    -H "Content-Type: application/json;charset=UTF-8" \
+    -d '{"title":"new post title","text":"new post text","tags":["tag_1", "tag_3"]}'
+
+###
+curl -X DELETE http://localhost:8080/api/posts/2
+
+###
+curl -F "file=@./hello-world.txt" http://localhost:8080/files/upload
+
+###
+curl http://localhost:8080/spring-web-demo/files/download/hello-world.txt
