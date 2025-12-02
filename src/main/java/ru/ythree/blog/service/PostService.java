@@ -30,10 +30,7 @@ public class PostService {
          * текст поста (в формате Markdown, если больше 128 символов, то обрезается до 128 символов и добавляется «…»)
          * */
 
-        Post post1 = new Post(1L, "Название поста 1", "Текст поста в формате Markdown...", Arrays.asList("tag_1", "tag_2"), 5, 1);
-        Post post2 = new Post(2L, "Название поста 2", "Текст поста в формате Markdown...", new ArrayList<>(), 1, 5);
-
-        List<Post> posts = Arrays.asList(post1, post2);
+        List<Post> posts = repository.findAll();
         return new Page(posts, true, false, 3);
     }
 

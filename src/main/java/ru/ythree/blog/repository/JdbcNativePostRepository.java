@@ -1,0 +1,100 @@
+package ru.ythree.blog.repository;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import ru.ythree.blog.model.Post;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+@Repository
+public class JdbcNativePostRepository implements PostRepository {
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public List<Post> findAll() {
+        String sql = """
+                select p.*, t.id as tag_id, t.tag
+                from posts p
+                left join tags t ON p.id = t.post_id
+                """;
+
+        Map<Long, Post> posts = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, (rs) -> {
+            Long postId = rs.getLong("id");
+
+            Post post = posts.get(postId);
+            if (post == null) {
+                post = new Post(postId,
+                        rs.getString("title"),
+                        rs.getString("text"),
+                        new ArrayList<>(),
+                        rs.getInt("likesCount"),
+                        rs.getInt("commentsCount"));
+                posts.put(postId, post);
+            }
+
+            if (rs.getInt("tag_id") != 0)
+                post.getTags().add(rs.getString("tag"));
+
+        });
+
+        return new ArrayList<>(posts.values());
+    }
+
+    @Override
+    public Post find(Long id) {
+        String sql = """
+                select p.*, t.id as tag_id, t.tag
+                from posts p
+                left join tags t ON p.id = t.post_id
+                where p.id=?
+                """;
+
+        Map<Long, Post> posts = new LinkedHashMap<>();
+        jdbcTemplate.query(sql,
+                new Object[]{id},
+                (rs) -> {
+                    Long postId = rs.getLong("id");
+
+                    Post post = posts.get(postId);
+                    if (post == null) {
+                        post = new Post(postId,
+                                rs.getString("title"),
+                                rs.getString("text"),
+                                new ArrayList<>(),
+                                rs.getInt("likesCount"),
+                                rs.getInt("commentsCount"));
+                        posts.put(postId, post);
+                    }
+
+                    if (rs.getInt("tag_id") != 0)
+                        post.getTags().add(rs.getString("tag"));
+                });
+
+        return posts.get(id);
+    }
+
+    @Override
+    public void save(Post post) {
+        jdbcTemplate.update("insert into posts(title, text, likesCount, commentsCount) values(?, ?, ?, ?)",
+                post.getTitle(), post.getText(), post.getLikesCount(), post.getCommentsCount());
+    }
+
+    @Override
+    public void update(Long id, Post post) {
+        jdbcTemplate.update("update posts set title=?, text=?, likesCount=?, commentsCount=? where id=?",
+                post.getTitle(), post.getText(), post.getLikesCount(), post.getCommentsCount(), id);
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update("delete from posts where id=?", id);
+    }
+}
