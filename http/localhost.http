@@ -18,6 +18,9 @@ curl -X PUT http://localhost:8080/api/posts/3 \
 curl -X DELETE http://localhost:8080/api/posts/2
 
 ###
+curl -X POST http://localhost:8080/api/posts/1/likes
+
+###
 curl -F "file=@./hello-world.txt" http://localhost:8080/files/upload
 
 ###

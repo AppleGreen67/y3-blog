@@ -49,9 +49,8 @@ public class PostController {
     }
 
     @PostMapping("/{id}/likes")
-    public long addLike(@PathVariable(name = "id") Long id) {
-        //todo Бэкенд должен добавить +1 к числу лайков поста и вернуть обновлённое число лайков поста (число в теле ответа)
-        return 666;
+    public long updateLikes(@PathVariable(name = "id") Long id) {
+        return service.updateLikes(id);
     }
 
     @PutMapping("/{id}/image")

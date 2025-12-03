@@ -51,4 +51,9 @@ public class PostService {
     public void deleteById(Long id) {
         repository.deleteById(id);
     }
+
+    public long updateLikes(Long id) {
+        repository.updateLikes(id);
+        return repository.find(id).getLikesCount();
+    }
 }

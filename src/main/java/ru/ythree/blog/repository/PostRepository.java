@@ -14,4 +14,6 @@ public interface PostRepository {
     void update(Long id, Post post);
 
     void deleteById(Long id);
+
+    void updateLikes(Long id);
 }

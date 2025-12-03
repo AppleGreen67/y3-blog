@@ -1,6 +1,7 @@
 package ru.ythree.blog.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Repository;
 import ru.ythree.blog.model.Post;
 
@@ -26,24 +27,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
-        jdbcTemplate.query(sql, (rs) -> {
-            Long postId = rs.getLong("id");
-
-            Post post = posts.get(postId);
-            if (post == null) {
-                post = new Post(postId,
-                        rs.getString("title"),
-                        rs.getString("text"),
-                        new ArrayList<>(),
-                        rs.getInt("likesCount"),
-                        rs.getInt("commentsCount"));
-                posts.put(postId, post);
-            }
-
-            if (rs.getInt("tag_id") != 0)
-                post.getTags().add(rs.getString("tag"));
-
-        });
+        jdbcTemplate.query(sql, postRowHandler(posts));
 
         return new ArrayList<>(posts.values());
     }
@@ -58,25 +42,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
-        jdbcTemplate.query(sql,
-                new Object[]{id},
-                (rs) -> {
-                    Long postId = rs.getLong("id");
-
-                    Post post = posts.get(postId);
-                    if (post == null) {
-                        post = new Post(postId,
-                                rs.getString("title"),
-                                rs.getString("text"),
-                                new ArrayList<>(),
-                                rs.getInt("likesCount"),
-                                rs.getInt("commentsCount"));
-                        posts.put(postId, post);
-                    }
-
-                    if (rs.getInt("tag_id") != 0)
-                        post.getTags().add(rs.getString("tag"));
-                });
+        jdbcTemplate.query(sql, new Object[]{id}, postRowHandler(posts));
 
         return posts.get(id);
     }
@@ -96,5 +62,30 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public void deleteById(Long id) {
         jdbcTemplate.update("delete from posts where id=?", id);
+    }
+
+    @Override
+    public void updateLikes(Long id) {
+        jdbcTemplate.update("update posts set likesCount=likesCount+1 where id=?", id);
+    }
+
+    private RowCallbackHandler postRowHandler(Map<Long, Post> posts) {
+        return (rs) -> {
+            Long postId = rs.getLong("id");
+
+            Post post = posts.get(postId);
+            if (post == null) {
+                post = new Post(postId,
+                        rs.getString("title"),
+                        rs.getString("text"),
+                        new ArrayList<>(),
+                        rs.getInt("likesCount"),
+                        rs.getInt("commentsCount"));
+                posts.put(postId, post);
+            }
+
+            if (rs.getInt("tag_id") != 0)
+                post.getTags().add(rs.getString("tag"));
+        };
     }
 }
