@@ -21,9 +21,11 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public List<Post> findAll() {
         String sql = """
-                select p.*, t.id as tag_id, t.tag
+                select p.*, t.id as tag_id, t.tag, count(distinct c.id) as commentsCount
                 from posts p
-                left join tags t ON p.id = t.post_id
+                left join tags t ON p.id=t.post_id
+                left join comments c on p.id=c.post_id
+                group by p.id, t.id
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
@@ -35,10 +37,12 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public Post find(Long id) {
         String sql = """
-                select p.*, t.id as tag_id, t.tag
+                select p.*, t.id as tag_id, t.tag, count(distinct c.id) as commentsCount
                 from posts p
-                left join tags t ON p.id = t.post_id
+                left join tags t ON p.id=t.post_id
+                left join comments c on p.id=c.post_id
                 where p.id=?
+                group by p.id, t.id
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
@@ -49,14 +53,14 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public void save(Post post) {
-        jdbcTemplate.update("insert into posts(title, text, likesCount, commentsCount) values(?, ?, ?, ?)",
-                post.getTitle(), post.getText(), post.getLikesCount(), post.getCommentsCount());
+        jdbcTemplate.update("insert into posts(title, text, likesCount) values(?, ?, ?)",
+                post.getTitle(), post.getText(), post.getLikesCount());
     }
 
     @Override
     public void update(Long id, Post post) {
-        jdbcTemplate.update("update posts set title=?, text=?, likesCount=?, commentsCount=? where id=?",
-                post.getTitle(), post.getText(), post.getLikesCount(), post.getCommentsCount(), id);
+        jdbcTemplate.update("update posts set title=?, text=?, likesCount=? where id=?",
+                post.getTitle(), post.getText(), post.getLikesCount(), id);
     }
 
     @Override
