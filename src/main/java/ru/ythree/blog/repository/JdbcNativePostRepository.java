@@ -2,9 +2,13 @@ package ru.ythree.blog.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.ythree.blog.model.Post;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,8 +57,18 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     public void save(Post post) {
-        jdbcTemplate.update("insert into posts(title, text, likesCount) values(?, ?, ?)",
-                post.getTitle(), post.getText(), post.getLikesCount());
+        String sql = "insert into posts(title, text, likesCount) values(?, ?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, post.getTitle());
+            ps.setString(2, post.getText());
+            ps.setLong(3, post.getLikesCount());
+            return ps;
+        }, keyHolder);
+
+        post.setId((Long) keyHolder.getKeys().get("id"));
     }
 
     @Override

@@ -2,9 +2,13 @@ package ru.ythree.blog.repository;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.ythree.blog.model.Comment;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Repository
@@ -35,8 +39,17 @@ public class JdbcNativeCommentRepository implements CommentRepository {
 
     @Override
     public void save(Comment comment) {
-        jdbcTemplate.update("insert into comments(text, post_id) values(?, ?)",
-                comment.getText(), comment.getPostId());
+        String sql = "insert into comments(text, post_id) values(?, ?)";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setString(1, comment.getText());
+            ps.setLong(2, comment.getPostId());
+            return ps;
+        }, keyHolder);
+
+        comment.setId((Long) keyHolder.getKeys().get("id"));
     }
 
     @Override
