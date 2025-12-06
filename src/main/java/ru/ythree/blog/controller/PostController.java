@@ -1,10 +1,15 @@
 package ru.ythree.blog.controller;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.ythree.blog.model.Comment;
 import ru.ythree.blog.model.Page;
 import ru.ythree.blog.model.Post;
 import ru.ythree.blog.service.CommentService;
+import ru.ythree.blog.service.FilesService;
 import ru.ythree.blog.service.PostService;
 
 import java.util.List;
@@ -15,10 +20,12 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+    private final FilesService filesService;
 
-    public PostController(PostService postService, CommentService commentService) {
+    public PostController(PostService postService, CommentService commentService, FilesService filesService) {
         this.postService = postService;
         this.commentService = commentService;
+        this.filesService = filesService;
     }
 
     @GetMapping
@@ -55,14 +62,16 @@ public class PostController {
     }
 
     @PutMapping("/{id}/image")
-    public void updateImage() {
-        //todo параметры запроса
+    public void updateImage(@PathVariable(name = "id") Long id, @RequestParam("image") MultipartFile file) {
+        filesService.upload(file, id);
     }
 
     @GetMapping("/{id}/image")
-    public void getImage() {
-        //todo параметры запроса и ответ
-        //Бэкенд должен вернуть массив байт картинки поста в теле ответа.
+    public ResponseEntity<Resource> getImage(@PathVariable(name = "id") Long id) {
+        Resource file = filesService.download(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(file);
     }
 
     @GetMapping("/{id}/comments")
