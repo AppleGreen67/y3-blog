@@ -23,17 +23,27 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public List<Post> findAll() {
+    public Integer count() {
+        return jdbcTemplate.queryForObject("select count(*) from posts p", Integer.class);
+    }
+
+    @Override
+    public List<Post> findAll(int offset, int size) {
         String sql = """
-                select p.*, t.id as tag_id, t.tag, count(distinct c.id) as commentsCount
+                select p.*, listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id
-                group by p.id, t.id
+                group by p.id
+                order by p.id
+                limit ?
+                offset ?
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
-        jdbcTemplate.query(sql, postRowHandler(posts));
+        jdbcTemplate.query(sql,
+                new Object[]{size, offset},
+                postRowHandler(posts));
 
         return new ArrayList<>(posts.values());
     }
@@ -41,12 +51,12 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public Post find(Long id) {
         String sql = """
-                select p.*, t.id as tag_id, t.tag, count(distinct c.id) as commentsCount
+                select p.*,listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id
                 where p.id=?
-                group by p.id, t.id
+                group by p.id
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
@@ -93,17 +103,15 @@ public class JdbcNativePostRepository implements PostRepository {
 
             Post post = posts.get(postId);
             if (post == null) {
+                String tags = rs.getString("tags_list");
                 post = new Post(postId,
                         rs.getString("title"),
                         rs.getString("text"),
-                        new ArrayList<>(),
+                        tags == null ? new String[]{} : tags.split(","),
                         rs.getInt("likesCount"),
                         rs.getInt("commentsCount"));
                 posts.put(postId, post);
             }
-
-            if (rs.getInt("tag_id") != 0)
-                post.getTags().add(rs.getString("tag"));
         };
     }
 }

@@ -17,7 +17,7 @@ public class PostService {
         this.repository = repository;
     }
 
-    public Page findPage(String search, String pageNumber, String pageSize) {
+    public Page findPage(String search, Integer pageNumber, Integer pageSize) {
         /**
          * Строка поиска разбивается на слова по пробелам.
          * Пустые слова удаляются из поиска.
@@ -30,8 +30,13 @@ public class PostService {
          * текст поста (в формате Markdown, если больше 128 символов, то обрезается до 128 символов и добавляется «…»)
          * */
 
-        List<Post> posts = repository.findAll();
-        return new Page(posts, true, false, 3);
+        Integer size = repository.count();
+
+        int offset = (pageNumber - 1) * pageSize;
+        List<Post> posts = repository.findAll(offset, pageSize);
+
+        int lastPage = (size / pageSize) + (size % pageSize == 0 ? 0 : 1);
+        return new Page(posts, pageNumber > 1, pageNumber < lastPage, lastPage);
     }
 
     public Post find(Long id) {

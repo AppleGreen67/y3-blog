@@ -5,7 +5,9 @@ import ru.ythree.blog.model.Post;
 import java.util.List;
 
 public interface PostRepository {
-    List<Post> findAll();
+    Integer count();
+
+    List<Post> findAll(int offset, int size);
 
     Post find(Long id);
 

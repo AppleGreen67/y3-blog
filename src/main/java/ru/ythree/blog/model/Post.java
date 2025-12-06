@@ -6,14 +6,14 @@ public class Post {
     private Long id;
     private String title;
     private String text;//todo текст поста (в формате Markdown, если больше 128 символов, то обрезается до 128 символов и добавляется «…»)
-    private List<String> tags;
+    private String[] tags;
     private long likesCount;
     private long commentsCount;
 
     public Post() {
     }
 
-    public Post(Long id, String title, String text, List<String> tags, int likesCount, int commentsCount) {
+    public Post(Long id, String title, String text, String[] tags, int likesCount, int commentsCount) {
         this.id = id;
         this.title = title;
         this.text = text;
@@ -46,11 +46,11 @@ public class Post {
         this.text = text;
     }
 
-    public List<String> getTags() {
+    public String[] getTags() {
         return tags;
     }
 
-    public void setTags(List<String> tags) {
+    public void setTags(String[] tags) {
         this.tags = tags;
     }
 
