@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ythree.blog.model.Post;
 
 import java.sql.PreparedStatement;
@@ -51,12 +52,13 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public Post find(Long id) {
         String sql = """
-                select p.*,listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
+                select p.*, listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id
                 where p.id=?
                 group by p.id
+                order by p.id
                 """;
 
         Map<Long, Post> posts = new LinkedHashMap<>();
@@ -66,6 +68,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    @Transactional
     public void save(Post post) {
         String sql = "insert into posts(title, text, likesCount) values(?, ?, ?)";
 
@@ -79,15 +82,23 @@ public class JdbcNativePostRepository implements PostRepository {
         }, keyHolder);
 
         post.setId((Long) keyHolder.getKeys().get("id"));
+
+        saveTags(post);
     }
 
     @Override
+    @Transactional
     public void update(Long id, Post post) {
         jdbcTemplate.update("update posts set title=?, text=?, likesCount=? where id=?",
                 post.getTitle(), post.getText(), post.getLikesCount(), id);
+
+        jdbcTemplate.update("delete from tags where post_id=?", id);
+
+        saveTags(post);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         jdbcTemplate.update("delete from posts where id=?", id);
     }
@@ -95,6 +106,14 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public void updateLikes(Long id) {
         jdbcTemplate.update("update posts set likesCount=likesCount+1 where id=?", id);
+    }
+
+    private void saveTags(Post post) {
+        String sql_tag = "insert into tags(tag, post_id) values(?, ?)";
+        String[] tags = post.getTags();
+        for (String tag : tags) {
+            jdbcTemplate.update(sql_tag, tag, post.getId());
+        }
     }
 
     private RowCallbackHandler postRowHandler(Map<Long, Post> posts) {
