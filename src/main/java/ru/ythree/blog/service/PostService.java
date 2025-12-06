@@ -11,6 +11,8 @@ import java.util.List;
 
 @Service
 public class PostService {
+    private static final int max_post_len = 128;
+
     private final PostRepository repository;
 
     public PostService(PostRepository repository) {
@@ -26,14 +28,15 @@ public class PostService {
          * Фильтрация постов по подстроке и тегам происходит по «И».
          * Если число постов на странице превышает выбранное значение (селект в правом верхнем углу), то становятся доступными кнопки внизу страницы перехода
          *
-         *
-         * текст поста (в формате Markdown, если больше 128 символов, то обрезается до 128 символов и добавляется «…»)
          * */
 
         Integer size = repository.count();
 
         int offset = (pageNumber - 1) * pageSize;
         List<Post> posts = repository.findAll(offset, pageSize);
+        posts.stream()
+                .filter(post -> post.getText() != null && post.getText().length() > max_post_len)
+                .forEach(post -> post.setText(post.getText().substring(0, max_post_len) + "..."));
 
         int lastPage = (size / pageSize) + (size % pageSize == 0 ? 0 : 1);
         return new Page(posts, pageNumber > 1, pageNumber < lastPage, lastPage);
