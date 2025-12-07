@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.ythree.blog.model.Image;
 import ru.ythree.blog.repository.ImageRepository;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -18,12 +19,16 @@ public class FilesService {
     }
 
     public void upload(MultipartFile file, Long postId) {
-            String imageName = file.getOriginalFilename();
-            Optional<Image> image = imageRepository.findByPostId(postId);
+        String imageName = file.getOriginalFilename();
+        Optional<Image> image = imageRepository.findByPostId(postId);
+        try {
             if (image.isEmpty())
-                imageRepository.save(imageName, file, postId);
+                imageRepository.save(imageName, file.getBytes(), postId);
             else
-                imageRepository.update(imageName, file, postId);
+                imageRepository.update(imageName, file.getBytes(), postId);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Resource download(Long postId) {

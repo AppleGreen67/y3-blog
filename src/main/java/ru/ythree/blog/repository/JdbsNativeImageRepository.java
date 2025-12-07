@@ -2,10 +2,8 @@ package ru.ythree.blog.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
 import ru.ythree.blog.model.Image;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -39,22 +37,14 @@ public class JdbsNativeImageRepository implements ImageRepository {
     }
 
     @Override
-    public void save(String imageName, MultipartFile file, Long postId) {
-        try {
-            jdbcTemplate.update("insert into images(name, data, post_id) values(?, ?, ?)",
-                    imageName, file.getBytes(), postId);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void save(String imageName, byte[] bytes, Long postId) {
+        jdbcTemplate.update("insert into images(name, data, post_id) values(?, ?, ?)",
+                imageName, bytes, postId);
     }
 
     @Override
-    public void update(String imageName, MultipartFile file, Long postId) {
-        try {
-            jdbcTemplate.update("update images set name=?, data=? where post_id=?",
-                    imageName, file.getBytes(), postId);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void update(String imageName, byte[] bytes, Long postId) {
+        jdbcTemplate.update("update images set name=?, data=? where post_id=?",
+                imageName, bytes, postId);
     }
 }
