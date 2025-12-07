@@ -2,11 +2,14 @@ package ru.ythree.blog.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.ythree.blog.model.Post;
+import ru.ythree.blog.model.SearchFilter;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -18,9 +21,11 @@ import java.util.Map;
 @Repository
 public class JdbcNativePostRepository implements PostRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcNativePostRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Override
@@ -29,23 +34,54 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public List<Post> findAll(int offset, int size) {
-        String sql = """
+    public List<Post> findAll(SearchFilter searchFilter, int offset, int size) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("limit", size);
+        params.addValue("offset", offset);
+
+        StringBuilder sql = new StringBuilder("""
                 select p.*, listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id
-                group by p.id
+                """);
+        if (searchFilter.getSearchStr() != null || searchFilter.getTags() != null) {
+            sql.append(" where ");
+        }
+        if (searchFilter.getSearchStr() != null) {
+            sql.append(" p.title like :titleSearch ");
+            params.addValue("titleSearch", "%" + searchFilter.getSearchStr() + "%");
+        }
+
+        if (searchFilter.getTags() != null) {
+            if (params.hasValue("titleSearch"))
+                sql.append(" and ");
+
+            String tagsFilter = """
+                    select pp.id
+                    from posts pp
+                    join tags tt on pp.id = tt.post_id
+                    where tt.tag in (:required_tags)
+                    group by pp.id
+                    having count(distinct tt.tag)=:required_tags_count
+                    """;
+            sql.append("p.id in (")
+                    .append(tagsFilter)
+                    .append(")");
+
+            params.addValue("required_tags", searchFilter.getTags());
+            params.addValue("required_tags_count", searchFilter.getTags().size());
+        }
+
+        sql.append("""
+                 group by p.id
                 order by p.id
-                limit ?
-                offset ?
-                """;
+                limit :limit
+                offset :offset
+                """);
 
         Map<Long, Post> posts = new LinkedHashMap<>();
-        jdbcTemplate.query(sql,
-                new Object[]{size, offset},
-                postRowHandler(posts));
-
+        namedParameterJdbcTemplate.query(sql.toString(), params, postRowHandler(posts));
         return new ArrayList<>(posts.values());
     }
 

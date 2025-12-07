@@ -1,12 +1,12 @@
 package ru.ythree.blog.service;
 
 import org.springframework.stereotype.Service;
+import ru.ythree.blog.factory.SearchFilterFactory;
 import ru.ythree.blog.model.Page;
 import ru.ythree.blog.model.Post;
+import ru.ythree.blog.model.SearchFilter;
 import ru.ythree.blog.repository.PostRepository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -20,24 +20,15 @@ public class PostService {
     }
 
     public Page findPage(String search, Integer pageNumber, Integer pageSize) {
-        /**
-         * Строка поиска разбивается на слова по пробелам.
-         * Пустые слова удаляются из поиска.
-         * Слова, начинающиеся с #, считаются тегами, и посты фильтруются по ним по «И».
-         * Слова, не начинающиеся с #, склеиваются вместе через пробел и считаются подстрокой поиска по названию.
-         * Фильтрация постов по подстроке и тегам происходит по «И».
-         * Если число постов на странице превышает выбранное значение (селект в правом верхнем углу), то становятся доступными кнопки внизу страницы перехода
-         *
-         * */
-
-        Integer size = repository.count();
+        SearchFilter searchFilter = SearchFilterFactory.create(search);
 
         int offset = (pageNumber - 1) * pageSize;
-        List<Post> posts = repository.findAll(offset, pageSize);
+        List<Post> posts = repository.findAll(searchFilter, offset, pageSize);
         posts.stream()
                 .filter(post -> post.getText() != null && post.getText().length() > max_post_len)
                 .forEach(post -> post.setText(post.getText().substring(0, max_post_len) + "..."));
 
+        Integer size = repository.count();
         int lastPage = (size / pageSize) + (size % pageSize == 0 ? 0 : 1);
         return new Page(posts, pageNumber > 1, pageNumber < lastPage, lastPage);
     }

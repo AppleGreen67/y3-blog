@@ -1,13 +1,14 @@
 package ru.ythree.blog.repository;
 
 import ru.ythree.blog.model.Post;
+import ru.ythree.blog.model.SearchFilter;
 
 import java.util.List;
 
 public interface PostRepository {
     Integer count();
 
-    List<Post> findAll(int offset, int size);
+    List<Post> findAll(SearchFilter searchFilter, int offset, int size);
 
     Post find(Long id);
 

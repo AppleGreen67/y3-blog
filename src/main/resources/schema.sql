@@ -30,9 +30,11 @@ create table if not exists images(
 
 --insert into posts(title, text, likesCount) values ('Название поста 1', 'Текст поста в формате Markdown...', 5);
 --insert into posts(title, text, likesCount) values ('Название поста 2', 'Текст поста в формате Markdown...', 1);
---
+----
 --insert into tags(tag, post_id) values ('tag_1', 1);
 --insert into tags(tag, post_id) values ('tag_2', 1);
+--
+--insert into tags(tag, post_id) values ('tag_2', );
 --
 --insert into comments(text, post_id) values ('Комментарий к посту 1', 1);
 --insert into comments(text, post_id) values ('Комментарий к посту 2', 1);
