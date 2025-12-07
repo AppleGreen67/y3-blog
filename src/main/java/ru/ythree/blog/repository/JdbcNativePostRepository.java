@@ -125,8 +125,8 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     @Transactional
     public void update(Long id, Post post) {
-        jdbcTemplate.update("update posts set title=?, text=?, likesCount=? where id=?",
-                post.getTitle(), post.getText(), post.getLikesCount(), id);
+        jdbcTemplate.update("update posts set title=?, text=? where id=?",
+                post.getTitle(), post.getText(), id);
 
         jdbcTemplate.update("delete from tags where post_id=?", id);
 
