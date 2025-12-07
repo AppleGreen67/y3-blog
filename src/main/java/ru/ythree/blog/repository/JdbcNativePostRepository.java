@@ -40,7 +40,7 @@ public class JdbcNativePostRepository implements PostRepository {
         params.addValue("offset", offset);
 
         StringBuilder sql = new StringBuilder("""
-                select p.*, listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
+                select p.*, listagg(distinct t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id
@@ -88,7 +88,7 @@ public class JdbcNativePostRepository implements PostRepository {
     @Override
     public Post find(Long id) {
         String sql = """
-                select p.*, listagg(t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
+                select p.*, listagg(distinct t.tag) within group (order by t.tag) as tags_list, count(distinct c.id) as commentsCount
                 from posts p
                 left join tags t ON p.id=t.post_id
                 left join comments c on p.id=c.post_id

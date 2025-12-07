@@ -32,7 +32,6 @@ public class PostController {
     public Page getPage(@RequestParam(name = "search") String search,
                         @RequestParam(name = "pageNumber") String pageNumber,
                         @RequestParam(name = "pageSize") String pageSize) {
-        //search — это строка из поля поиска, pageNumber — номер текущей страницы, pageSize — число постов на странице
         return postService.findPage(search, Integer.parseInt(pageNumber), Integer.parseInt(pageSize));
     }
 
