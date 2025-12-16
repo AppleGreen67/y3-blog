@@ -163,8 +163,8 @@ public class JdbcNativePostRepository implements PostRepository {
                         rs.getString("title"),
                         rs.getString("text"),
                         tags == null ? new String[]{} : tags.split(","),
-                        rs.getInt("likesCount"),
-                        rs.getInt("commentsCount"));
+                        rs.getLong("likesCount"),
+                        rs.getLong("commentsCount"));
                 posts.put(postId, post);
             }
         };
