@@ -49,4 +49,14 @@ public class Page {
     public void setLastPage(int lastPage) {
         this.lastPage = lastPage;
     }
+
+    @Override
+    public String toString() {
+        return "Page{" +
+                "posts=" + posts +
+                ", hasPrev=" + hasPrev +
+                ", hasNext=" + hasNext +
+                ", lastPage=" + lastPage +
+                '}';
+    }
 }
