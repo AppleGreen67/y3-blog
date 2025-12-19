@@ -1,5 +1,5 @@
 # Бэкенд приложения-блога на основе Spring Framework
-### Yandex Practicum. Java-Middle. Sprint 3
+### Yandex Practicum. Java-Middle. Sprint 4
 
 ## Запуск приложения
 0. Установить docker
