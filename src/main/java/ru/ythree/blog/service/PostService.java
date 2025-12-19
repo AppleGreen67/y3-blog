@@ -22,7 +22,7 @@ public class PostService {
     public Page findPage(String search, Integer pageNumber, Integer pageSize) {
         SearchFilter searchFilter = SearchFilterFactory.create(search);
 
-        int offset = (pageNumber - 1) * pageSize;
+        Integer offset = (pageNumber - 1) * pageSize;
         List<Post> posts = repository.findAll(searchFilter, offset, pageSize);
         posts.stream()
                 .filter(post -> post.getText() != null && post.getText().length() > max_post_len)

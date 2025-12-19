@@ -34,7 +34,7 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public List<Post> findAll(SearchFilter searchFilter, int offset, int size) {
+    public List<Post> findAll(SearchFilter searchFilter, Integer offset, Integer size) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("limit", size);
         params.addValue("offset", offset);
