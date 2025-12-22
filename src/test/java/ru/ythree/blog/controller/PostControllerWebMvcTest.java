@@ -65,6 +65,15 @@ class PostControllerWebMvcTest {
     }
 
     @Test
+    void getPost_handleException() throws Exception {
+        long postId = 11L;
+        when(postService.find(postId)).thenThrow(new RuntimeException("Some exception in post service"));
+
+        mockMvc.perform(get("/api/posts/{postId}", postId))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
     void getPage_noSearch_onePage() throws Exception {
         when(postService.findPage("", 1, 5))
                 .thenReturn(new Page(Arrays.asList(post1, post2, post3), false, false, 1));
