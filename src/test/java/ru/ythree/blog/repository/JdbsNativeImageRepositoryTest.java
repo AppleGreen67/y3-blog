@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.ythree.blog.model.Image;
 
@@ -15,11 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJdbcTest
+@Import(JdbsNativeImageRepository.class)
 class JdbsNativeImageRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
     private ImageRepository imageRepository;
 
     private byte[] imageBytes = {1, 2, 3, 4};

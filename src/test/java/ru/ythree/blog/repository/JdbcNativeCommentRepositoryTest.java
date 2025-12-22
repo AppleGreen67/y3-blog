@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.ythree.blog.model.Comment;
 
@@ -13,17 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DataJdbcTest
+@Import(JdbcNativeCommentRepository.class)
 class JdbcNativeCommentRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
     private CommentRepository commentRepository;
 
     @BeforeEach
     void setUp() {
-        commentRepository = new JdbcNativeCommentRepository(jdbcTemplate);
-
         jdbcTemplate.execute("delete from posts");
         jdbcTemplate.execute("delete from comments");
 

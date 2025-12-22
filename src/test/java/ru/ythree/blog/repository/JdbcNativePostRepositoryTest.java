@@ -4,7 +4,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import ru.ythree.blog.model.Post;
@@ -18,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJdbcTest
+@Import(JdbcNativePostRepository.class)
 class JdbcNativePostRepositoryTest {
 
     @Autowired
@@ -25,12 +28,11 @@ class JdbcNativePostRepositoryTest {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    @Autowired
     private PostRepository postRepository;
 
     @BeforeEach
     void setUp() {
-        postRepository = new JdbcNativePostRepository(jdbcTemplate, namedParameterJdbcTemplate);
-
         jdbcTemplate.execute("delete from posts");
         jdbcTemplate.execute("delete from tags");
         jdbcTemplate.execute("delete from comments");
