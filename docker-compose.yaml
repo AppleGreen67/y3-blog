@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  tomcat:
-    container_name: tomcat_c
+  y3-blog:
+    container_name: y3-blog
     build: .
     restart: always
     ports:

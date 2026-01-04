@@ -1,11 +1,9 @@
 package ru.ythree.blog.model;
 
-import java.util.List;
-
 public class Post {
     private Long id;
     private String title;
-    private String text;//todo текст поста (в формате Markdown, если больше 128 символов, то обрезается до 128 символов и добавляется «…»)
+    private String text;
     private String[] tags;
     private long likesCount;
     private long commentsCount;
@@ -13,7 +11,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(Long id, String title, String text, String[] tags, int likesCount, int commentsCount) {
+    public Post(Long id, String title, String text, String[] tags, long likesCount, long commentsCount) {
         this.id = id;
         this.title = title;
         this.text = text;

@@ -5,6 +5,15 @@ public class Image {
     private byte[] data;
     private Long postId;
 
+    public Image() {
+    }
+
+    public Image(String name, byte[] data, Long postId) {
+        this.name = name;
+        this.data = data;
+        this.postId = postId;
+    }
+
     public String getName() {
         return name;
     }

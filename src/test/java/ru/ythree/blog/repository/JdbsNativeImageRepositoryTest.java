@@ -3,19 +3,20 @@ package ru.ythree.blog.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.ythree.blog.config.DataSourceConfiguration;
 import ru.ythree.blog.model.Image;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringJUnitConfig(classes = {DataSourceConfiguration.class,
-        JdbsNativeImageRepository.class})
-@TestPropertySource(locations = "classpath:test-application.properties")
+@DataJdbcTest
+@Import(JdbsNativeImageRepository.class)
 class JdbsNativeImageRepositoryTest {
 
     @Autowired
@@ -28,6 +29,8 @@ class JdbsNativeImageRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        imageRepository = new JdbsNativeImageRepository(jdbcTemplate);
+
         jdbcTemplate.execute("delete from posts");
         jdbcTemplate.execute("delete from images");
 

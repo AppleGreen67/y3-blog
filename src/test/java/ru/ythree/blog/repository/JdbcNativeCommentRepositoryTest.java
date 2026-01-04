@@ -3,19 +3,18 @@ package ru.ythree.blog.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import ru.ythree.blog.config.DataSourceConfiguration;
 import ru.ythree.blog.model.Comment;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@SpringJUnitConfig(classes = {DataSourceConfiguration.class,
-        JdbcNativeCommentRepository.class})
-@TestPropertySource(locations = "classpath:test-application.properties")
+@DataJdbcTest
+@Import(JdbcNativeCommentRepository.class)
 class JdbcNativeCommentRepositoryTest {
 
     @Autowired

@@ -1,15 +1,21 @@
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM gradle:8.7-jdk21-alpine AS build
 
 WORKDIR /app
 
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package
+COPY gradle gradle
+COPY build.gradle .
+COPY gradlew .
+COPY settings.gradle .
+COPY src src
 
-FROM tomcat:10.1-jre21-temurin
+RUN chmod +x gradlew
 
-COPY --from=build /app/target/y3-blog.war /usr/local/tomcat/webapps/ROOT.war
+RUN ./gradlew bootJar --no-daemon
+
+FROM eclipse-temurin:21-jre-alpine
+
+COPY --from=build /app/build/libs/*.jar y3-blog.jar
 
 EXPOSE 8080
 
-CMD ["catalina.sh", "run"]
+CMD ["java", "-jar", "y3-blog.jar"]
